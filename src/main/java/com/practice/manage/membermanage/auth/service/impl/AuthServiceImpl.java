@@ -7,6 +7,7 @@ import com.practice.manage.membermanage.auth.exception.InvalidKakaoLoginExceptio
 import com.practice.manage.membermanage.auth.exception.TokenIsNotValidException;
 import com.practice.manage.membermanage.auth.exception.UserNotFoundException;
 import com.practice.manage.membermanage.auth.repository.AuthMapper;
+import com.practice.manage.membermanage.auth.service.domain.KakaoUser;
 import com.practice.manage.membermanage.auth.service.domain.Signin;
 import com.practice.manage.membermanage.auth.service.AuthService;
 import com.practice.manage.membermanage.auth.service.domain.Status;

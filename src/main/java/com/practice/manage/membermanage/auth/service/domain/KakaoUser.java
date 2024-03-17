@@ -1,4 +1,4 @@
-package com.practice.manage.membermanage.auth.service.impl;
+package com.practice.manage.membermanage.auth.service.domain;
 
 import lombok.Builder;
 import lombok.Getter;
