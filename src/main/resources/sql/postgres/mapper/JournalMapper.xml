@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.main.repository.JournalMapper">
+    <select id="getJournalList" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , "date" as visited_at
+             , place_name
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by "date") as next_id
+          from journal
+         where report_id = #{reportId}
+           and "date" >= (select "date" from journal where id = #{from})
+         order by "date"
+         limit #{size};
+    </select>
+
+    <select id="getOldJournalList" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , "date" as visited_at
+             , place_name
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by "date") as next_id
+        from journal
+        where report_id = #{reportId}
+        order by "date"
+        limit #{size};
+    </select>
+
+    <select id="getJournal" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , "date" as visited_at
+             , place_name
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by "date") as next_id
+          from journal
+         where id = #{journalId}
+         order by "date";
+    </select>
+
+    <select id="getAllJournalList" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , "date" as visited_at
+             , place_name
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by "date") as next_id
+        from journal
+        where "date" >= (select "date" from journal where id = #{from})
+        order by "date"
+        limit #{size};
+    </select>
+
+    <select id="getAllOldJournalList" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , "date" as visited_at
+             , place_name
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by "date") as next_id
+        from journal
+        order by "date"
+            limit #{size};
+    </select>
+
+    <insert id="postJournal">
+        insert into journal
+             ( uid
+             , report_id
+             , "date"
+             , place_name
+             , description
+             , status
+             , ins_date )
+        values ( #{uid}
+               , #{journal.reportId}
+               , #{journal.visitedAt}
+               , #{journal.placeName}
+               , #{journal.description}
+               , 'Y'
+               , now() );
+    </insert>
+
+    <update id="putJournal">
+        update journal
+           set "date"=#{journal.visitedAt}
+             , place_name=#{journal.placeName}
+             , description=#{journal.description}
+         where id=#{journalId}
+    </update>
+
+    <delete id="deleteJournal">
+        delete from journal
+         where id=#{journalId}
+    </delete>
+</mapper>

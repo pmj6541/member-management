@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.main.repository.RefundMapper">
+    <select id="getRefundList" resultType="com.practice.manage.membermanage.main.domain.Refund">
+        select id
+             , place_name
+             , quantity
+             , (select name from product where id = product_id) as product_name
+             , (select name from unit where id = unit_id) as unit
+             , reason
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+          from refund
+         where report_id = #{reportId}
+           and id >= #{from}
+         order by id
+         limit #{size};
+    </select>
+
+    <select id="getRefund" resultType="com.practice.manage.membermanage.main.domain.Refund">
+        select id
+             , place_name
+             , quantity
+             , (select name from product where id = product_id) as product_name
+             , (select name from unit where id = unit_id) as unit
+             , reason
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+          from refund
+         order by id
+         where id = #{refundId};
+    </select>
+
+    <select id="getAllRefundList" resultType="com.practice.manage.membermanage.main.domain.Refund">
+        select id
+             , place_name
+             , quantity
+             , (select name from product where id = product_id) as product_name
+             , (select name from unit where id = unit_id) as unit
+             , reason
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+        from refund
+        where id >= #{from}
+        order by id
+            limit #{size};
+    </select>
+
+    <insert id="postRefund">
+        insert into refund
+             ( uid
+             , report_id
+             , place_name
+             , quantity
+             , product_id
+             , unit_id
+             , reason
+             , status
+             , ins_date )
+        values ( #{uid}
+               , #{refund.reportId}
+               , #{refund.placeName}
+               , #{refund.quantity}
+               , (select id from product where name = #{refund.productName})
+               , (select id from unit where name = #{refund.unit})
+               , #{refund.reason}
+               , 'Y'
+               , now() );
+    </insert>
+
+    <update id="putRefund">
+        update refund
+           set place_name=#{refund.placeName}
+             , quantity=#{refund.quantity}
+             , product_id=(select id from product where name = #{refund.productName})
+             , unit_id=(select id from unit where name = #{refund.unit})
+             , reason=#{refund.reason}
+         where id=#{refundId}
+    </update>
+
+    <delete id="deleteRefund">
+        delete from refund
+         where id=#{refundId}
+    </delete>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.main.repository.ExpenseMapper">
+    <select id="getExpenseList" resultType="com.practice.manage.membermanage.main.domain.Expense">
+        select id
+             , amount
+             , type
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+          from expense
+         where report_id = #{reportId}
+           and id >= #{from}
+         order by id
+         limit #{size};
+    </select>
+
+    <select id="getExpense" resultType="com.practice.manage.membermanage.main.domain.Expense">
+        select id
+             , amount
+             , type
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+          from expense
+         where id = #{expenseId}
+         order by id;
+    </select>
+
+    <select id="getAllExpenseList" resultType="com.practice.manage.membermanage.main.domain.Expense">
+        select id
+             , amount
+             , type
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id) as next_id
+          from expense
+         where id >= #{from}
+         order by id
+         limit #{size};
+    </select>
+
+    <insert id="postExpense">
+        insert into expense
+             ( uid
+             , report_id
+             , amount
+             , type
+             , description
+             , status
+             , ins_date )
+        values ( #{uid}
+               , #{expense.reportId}
+               , #{expense.amount}
+               , #{expense.type}
+               , #{expense.description}
+               , 'Y'
+               , now() );
+    </insert>
+
+    <update id="putExpense">
+        update expense
+           set amount = #{expense.amount}
+             , type = #{expense.type}
+             , description = #{expense.description}
+         where id=#{expenseId}
+    </update>
+
+    <delete id="deleteExpense">
+        delete from expense
+         where id=#{expenseId}
+    </delete>
+</mapper>

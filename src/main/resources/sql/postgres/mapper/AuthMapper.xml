@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.auth.repository.AuthMapper">
+    <select id="getUserByUid" resultType="com.practice.manage.membermanage.auth.service.domain.User">
+        select id
+             , uid
+             , display_name
+             , role
+             , phone_number
+             , ins_date
+          from "user"
+         where uid = #{uid}
+           and status = 'active';
+    </select>
+
+    <select id="getKeysetByProject" resultType="com.practice.manage.membermanage.auth.service.domain.Keyset">
+        select project
+             , private_key
+             , public_key
+             , access_token_ttl
+             , refresh_token_ttl
+          from keyset
+         where project = #{project}
+    </select>
+
+    <update id="setUserCodeByUid">
+        update "user"
+           set auth_code = #{code}
+             , last_login_date = now()
+         where uid = #{uid}
+    </update>
+
+    <insert id="addUser">
+        insert into "user"
+             ( uid
+             , display_name
+             , phone_number
+             , status
+             , ins_date
+        )values
+             ( #{uid}
+             , #{displayName}
+             , #{phoneNumber}
+             , #{status}
+             , now()
+        )on conflict(uid)
+         do update
+            set mod_date = now();
+    </insert>
+
+    <insert id="setRefreshToken">
+        insert into user_refresh
+             ( uid
+             , refresh_token
+             , issued_at
+             , expired_at
+             , ins_date
+        )values
+             ( #{uid}
+             , #{refreshToken}
+             , #{issuedAt}
+             , #{expiredAt}
+             , now()
+            )on conflict(uid)
+             do update
+                set refresh_token = #{refreshToken}
+                  , issued_at = #{issuedAt}
+                  , expired_at = #{expiredAt}
+                  , mod_date = now();
+    </insert>
+
+    <select id="getUidByRefreshTokenAndTime" resultType="String">
+        select uid
+          from user_refresh
+         where refresh_token = #{refreshToken}
+           and expired_at > #{now};
+    </select>
+</mapper>

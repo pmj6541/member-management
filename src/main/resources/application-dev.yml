@@ -1,0 +1,42 @@
+server:
+  port: 21001
+  servlet:
+    context-path: /v1
+  error:
+    include-binding-errors: always
+    include-message: always
+    whitelabel:
+      enabled: false
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: #보안을 위한 DB 주소 비공개
+    username: #secret
+    password: #secret
+    hikari:
+      maximum-pool-size: 50
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: file:./public.pem
+
+
+member:
+  api:
+    key: #API Key 보안
+    url: #URL 보안
+
+
+mybatis:
+  mapper-locations: classpath:sql/postgres/mapper/**/*.xml
+
+springdoc:
+  writer-with-order-by-keys: true
+  paths-to-match:
+    - /ping
+    - /**/*
+
+

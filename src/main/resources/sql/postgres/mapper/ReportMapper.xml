@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.main.repository.ReportMapper">
+
+    <select id="getRecentReportList" resultType="com.practice.manage.membermanage.main.domain.Report">
+        select id
+             , date
+             , ins_date as created_at
+             , mod_date as updated_at
+             , sub_date as submitted_at
+             , status
+             , lead(id) over(order by date desc) as next_id
+        from report
+        where uid = #{uid}
+          and status != 'deleted'
+        order by date desc
+            limit #{size};
+    </select>
+
+    <select id="getReportList" resultType="com.practice.manage.membermanage.main.domain.Report">
+		select id
+			 , date
+			 , ins_date as created_at
+			 , mod_date as updated_at
+			 , sub_date as submitted_at
+             , status
+			 , lead(id) over(order by date desc) as next_id
+		  from report
+		 where uid = #{uid}
+           and (select date from report where id = #{from}) >= date
+           and status != 'deleted'
+		 order by date desc
+	     limit #{size};
+    </select>
+
+    <select id="getReportListByMonth" resultType="com.practice.manage.membermanage.main.domain.Report">
+        select id
+             , date
+             , ins_date as created_at
+             , mod_date as updated_at
+             , sub_date as submitted_at
+             , status
+             , lead(id) over(order by date desc) as next_id
+          from report
+         where uid = #{uid}
+           and date > to_timestamp(#{month},'yyyy-mm')
+           and to_timestamp(#{month},'yyyy-mm') + '1 month' > date
+           and status != 'deleted'
+         order by date desc;
+    </select>
+
+    <select id="getReport" resultType="com.practice.manage.membermanage.main.domain.Report">
+        select id
+             , date
+             , ins_date as created_at
+             , mod_date as updated_at
+             , sub_date as submitted_at
+             , status
+             , lead(id) over(order by id) as next_id
+          from report
+         where id = #{reportId}
+           and status != 'deleted'
+    </select>
+
+    <select id="getJournalListByReportId" resultType="com.practice.manage.membermanage.main.domain.Journal">
+        select id
+             , place_name
+             , date as visited_at
+          from journal
+         where report_id = #{id}
+    </select>
+
+    <select id="getSummaryByReportId" resultType="com.practice.manage.membermanage.main.domain.Summary">
+        with
+            w_base as (
+                select #{id} as report_id
+            )--select * from w_base;
+           , w_journal as (
+            select report_id
+                 , count(*) as journal_count
+            from journal
+            where report_id = #{id}
+            group by report_id
+        )--select * from w_journal;
+           , w_refund as (
+            select report_id
+                 , count(*) as refund_count
+            from refund
+            where report_id = #{id}
+            group by report_id
+        )--select * from w_refund;
+           , w_expense as (
+            select report_id
+                 , count(amount) as expense_count
+                 , sum(amount) as expense_amount
+            from expense
+            where report_id = #{id}
+            group by report_id
+        )--select * from w_expense;
+           , w_note as (
+            select report_id
+                 , count(note) as note_count
+            from note
+            where report_id = #{id}
+            group by report_id
+        )--select * from w_note;
+        select case when j.journal_count is null then 0 else j.journal_count end
+             , case when r.refund_count is null then 0 else r.refund_count end
+             , case when e.expense_amount is null then 0 else e.expense_amount end
+             , case when e.expense_count is null then 0 else e.expense_count end
+             , case when n.note_count is null then 0 else n.note_count end
+        from w_base b
+                 left outer join w_journal j
+                                 on b.report_id = j.report_id
+                 left outer join w_refund r
+                                 on b.report_id = r.report_id
+                 left outer join w_expense e
+                                 on b.report_id = e.report_id
+                 left outer join w_note n
+                                 on b.report_id = n.report_id
+    </select>
+
+    <select id="postReport" resultType="Integer">
+        INSERT INTO report
+            (uid, "date", status, ins_date)
+        VALUES(#{uid}, #{date}, 'created', now())
+        returning id;
+    </select>
+
+    <update id="submitReport">
+        update report
+           set status = 'submitted'
+             , sub_date = now()
+         where id = #{reportId}
+    </update>
+
+    <update id="deleteReport">
+        update report
+           set status = 'deleted'
+         where id = #{reportId}
+    </update>
+
+    <update id="setStatusInProgress">
+        update report
+           set status = 'in_progress'
+         where id = #{reportId}
+    </update>
+
+</mapper>

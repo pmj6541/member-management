@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.practice.manage.membermanage.main.repository.NoteMapper">
+    <select id="getNoteList" resultType="com.practice.manage.membermanage.main.domain.Note">
+        select id
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id desc) as next_id
+          from note
+         where report_id = #{reportId}
+           and id >= #{from}
+         order by id desc
+         limit #{size};
+    </select>
+
+    <select id="getNote" resultType="com.practice.manage.membermanage.main.domain.Note">
+        select id
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id desc) as next_id
+          from note
+         where id = #{noteId}
+         order by id desc;
+    </select>
+
+    <select id="getAllNoteList" resultType="com.practice.manage.membermanage.main.domain.Note">
+        select id
+             , description
+             , ins_date as created_at
+             , lead(id) over(order by id desc) as next_id
+          from note
+         where id >= #{from}
+         order by id desc
+         limit #{size};
+    </select>
+
+    <insert id="postNote">
+        insert into note
+             ( uid
+             , report_id
+             , description
+             , status
+             , ins_date )
+        values ( #{uid}
+               , #{note.reportId}
+               , #{note.description}
+               , 'Y'
+               , now() );
+    </insert>
+
+    <update id="putNote">
+        update note
+           set description=#{note.description}
+         where id=#{noteId}
+    </update>
+
+    <delete id="deleteNote">
+        delete from note
+         where id=#{noteId}
+    </delete>
+</mapper>
